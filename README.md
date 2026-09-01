@@ -1,8 +1,8 @@
-# PostgreSQL read-only REST API
+# UI Service
 
-A FastAPI application that reads case and file records from PostgreSQL. The
-database columns use snake_case, while JSON responses and query parameters use
-camelCase.
+A FastAPI backend for the UI that reads case records from PostgreSQL and
+creates signed Supabase Storage upload URLs. Database columns use snake_case,
+while JSON responses and query parameters use camelCase.
 
 ## Documentation
 
@@ -84,20 +84,18 @@ Interactive API documentation is available at `http://localhost:3000/docs`.
 
 > The API currently has no caller authentication. Keep it on a trusted network
 > until authentication and authorization have been added. For production,
-> connect using a PostgreSQL role limited to `SELECT` on the two exposed tables.
+> connect using a PostgreSQL role limited to `SELECT` on `case_details`.
 
 ## Endpoints
 
 ```http
 GET /rest/v1/cases
 GET /rest/v1/cases/{id}
-GET /rest/v1/files
-GET /rest/v1/files/{id}
 GET /rest/v1/case/{id}/action/getUploadUrl
 ```
 
-The endpoints are read-only. `/rest/v1/cases` reads `case_details`, and
-`/rest/v1/files` reads `file_details`.
+The case endpoints are read-only and query `case_details`. The upload action
+creates a signed Supabase Storage URL but does not upload a file itself.
 
 Generate a short-lived Supabase Storage upload URL for an existing case:
 
@@ -119,26 +117,23 @@ Search every field using a case-insensitive keyword search:
 
 ```http
 GET /rest/v1/cases?search=fraud
-GET /rest/v1/files?search=invoice
 ```
 
 Search one field:
 
 ```http
 GET /rest/v1/cases?field=caseCategory&search=fraud
-GET /rest/v1/files?field=extractedContent&search=invoice
 ```
 
 Filter using camelCase field names. Multiple filters use AND logic:
 
 ```http
 GET /rest/v1/cases?caseCategory=fraud&addedBy=admin
-GET /rest/v1/files?caseId=1001&fileName=evidence
 ```
 
-`id` and `caseId` filters are exact. Other filters are case-insensitive partial
-matches. Query values are parameterized, while table and column identifiers come
-from fixed allowlists.
+The `id` filter is exact. Other filters are case-insensitive partial matches.
+Query values are parameterized, while table and column identifiers come from
+fixed allowlists.
 
 ## Test
 

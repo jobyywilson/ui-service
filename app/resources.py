@@ -39,23 +39,3 @@ CASES = ResourceDefinition(
     ),
     exact_fields=frozenset({"id"}),
 )
-
-FILES = ResourceDefinition(
-    table="file_details",
-    singular_name="File",
-    fields=MappingProxyType(
-        {
-            "id": "id",
-            "fileName": "file_name",
-            "caseId": "case_id",
-            "extractedContent": "extracted_content",
-            "dateAdded": "date_added",
-            "dateModified": "date_modified",
-            "addedBy": "added_by",
-            "modifiedBy": "modified_by",
-        }
-    ),
-    exact_fields=frozenset({"id", "caseId"}),
-)
-
-RESOURCES = MappingProxyType({"cases": CASES, "files": FILES})

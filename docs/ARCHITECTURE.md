@@ -20,9 +20,9 @@ HTTP request
 | Module | Responsibility |
 | --- | --- |
 | `app/main.py` | Builds FastAPI, configures CORS, and registers error handlers. |
-| `app/routes.py` | Declares the four read endpoints and response contracts. |
+| `app/routes.py` | Declares the read and upload-URL endpoints and response contracts. |
 | `app/filters.py` | Defines typed, camelCase query parameters for OpenAPI. |
-| `app/models.py` | Defines the case and file response schemas. |
+| `app/models.py` | Defines the case and upload-URL response schemas. |
 | `app/services.py` | Coordinates query construction and database execution. |
 | `app/query_builder.py` | Validates filters and produces parameterized SELECTs. |
 | `app/resources.py` | Holds the fixed API-to-database identifier allowlists. |
@@ -37,14 +37,14 @@ HTTP request
 - Table and column identifiers can only come from the mappings in
   `app/resources.py`; request values are never interpolated as identifiers.
 - `.env` is ignored by Git. `.env.example` contains placeholders only.
-- The API is read-only at the route and SQL layers.
+- The PostgreSQL routes and SQL layer are read-only.
 - Upload URLs are non-cacheable, scoped to one generated object path, and the
   Supabase secret key never leaves the backend.
 - The API currently has no caller authentication. Do not expose it publicly
   until an authentication and authorization policy has been added.
 - For production, connect with a dedicated PostgreSQL role that has only
-  `SELECT` access to `case_details` and `file_details`, rather than the Supabase
-  `postgres` administrator role.
+  `SELECT` access to `case_details`, rather than the Supabase `postgres`
+  administrator role.
 
 ## Database connections
 

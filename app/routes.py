@@ -1,12 +1,12 @@
-"""FastAPI routes for case and file resources."""
+"""FastAPI routes for case resources and upload actions."""
 
 from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Response
 
-from app.filters import CaseFilters, FileFilters
-from app.models import CaseResponse, FileResponse, UploadUrlResponse
-from app.resources import CASES, FILES
+from app.filters import CaseFilters
+from app.models import CaseResponse, UploadUrlResponse
+from app.resources import CASES
 from app.services import (
     QueryExecutor,
     UploadUrlProvider,
@@ -57,43 +57,6 @@ def read_case(
     """Return one case record by primary key."""
 
     return get_record(CASES, record_id, query_executor)
-
-
-@router.get(
-    "/files",
-    response_model=List[FileResponse],
-    summary="List and search files",
-    description=(
-        "Returns rows from `file_details`. Use `caseId` for an exact case "
-        "filter or `search` for a keyword search across all exposed fields."
-    ),
-    responses={400: {"description": "Invalid search field or filter."}},
-    tags=["Files"],
-)
-def read_files(
-    filters: Annotated[FileFilters, Query()],
-    query_executor: QueryExecutor = Depends(get_query_executor),
-):
-    """List file records using validated, parameterized filters."""
-
-    return list_records(FILES, filters.as_query_parameters(), query_executor)
-
-
-@router.get(
-    "/files/{record_id}",
-    response_model=FileResponse,
-    summary="Get a file by ID",
-    description="Returns one `file_details` row using its numeric identifier.",
-    responses={404: {"description": "File not found."}},
-    tags=["Files"],
-)
-def read_file(
-    record_id: int,
-    query_executor: QueryExecutor = Depends(get_query_executor),
-):
-    """Return one file record by primary key."""
-
-    return get_record(FILES, record_id, query_executor)
 
 
 @action_router.get(

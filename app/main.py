@@ -22,21 +22,18 @@ def create_app() -> FastAPI:
 
     load_env_file()
     application = FastAPI(
-        title="Case Storage Read API",
+        title="UI Service",
         description=(
-            "Read-only access to `case_details` and `file_details`. Database "
-            "columns are returned as camelCase JSON properties. Collection "
-            "endpoints support keyword, field-specific, and direct filtering."
+            "Backend APIs for the UI to read case metadata and obtain signed "
+            "case-file upload URLs. Database columns are returned as camelCase "
+            "JSON properties. Collection endpoints support keyword, "
+            "field-specific, and direct filtering."
         ),
         version="1.0.0",
         openapi_tags=[
             {
                 "name": "Cases",
                 "description": "Read and search existing case metadata.",
-            },
-            {
-                "name": "Files",
-                "description": "Read and search file metadata and extracted content.",
             },
             {
                 "name": "Uploads",

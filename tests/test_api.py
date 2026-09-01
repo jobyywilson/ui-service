@@ -22,20 +22,6 @@ CASE_ROWS = [
     }
 ]
 
-FILE_ROWS = [
-    {
-        "id": 501,
-        "fileName": "evidence.pdf",
-        "caseId": 1001,
-        "extractedContent": "Extracted document content",
-        "dateAdded": "2026-09-01T11:00:00",
-        "dateModified": "2026-09-01T11:00:00",
-        "addedBy": "admin",
-        "modifiedBy": "admin",
-    }
-]
-
-
 class RecordingExecutor:
     def __init__(self, rows):
         self.rows = rows
@@ -82,17 +68,6 @@ class ApiTests(unittest.TestCase):
         self.assertIn('case_description AS "caseDescription"', executor.calls[0][0])
         self.assertEqual(response.headers["access-control-allow-origin"], "*")
 
-    def test_get_files_reads_file_details(self):
-        executor = RecordingExecutor(FILE_ROWS)
-        client = self._client(executor)
-
-        response = client.get("/rest/v1/files")
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), FILE_ROWS)
-        self.assertIn("FROM file_details", executor.calls[0][0])
-        self.assertIn('case_id AS "caseId"', executor.calls[0][0])
-
     def test_returns_one_record_by_id(self):
         executor = RecordingExecutor(CASE_ROWS)
         client = self._client(executor)
@@ -106,10 +81,10 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(parameters, (1001,))
 
     def test_returns_404_when_record_does_not_exist(self):
-        response = self._client(RecordingExecutor([])).get("/rest/v1/files/999")
+        response = self._client(RecordingExecutor([])).get("/rest/v1/cases/999")
 
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["error"], "File not found.")
+        self.assertEqual(response.json()["error"], "Case not found.")
 
     def test_rejects_unknown_search_field_without_database_call(self):
         executor = RecordingExecutor(CASE_ROWS)
@@ -138,6 +113,8 @@ class ApiTests(unittest.TestCase):
         client = self._client(RecordingExecutor(CASE_ROWS))
 
         self.assertEqual(client.get("/cases").status_code, 404)
+        self.assertEqual(client.get("/rest/v1/files").status_code, 404)
+        self.assertEqual(client.get("/rest/v1/files/501").status_code, 404)
         self.assertEqual(client.post("/rest/v1/cases").status_code, 405)
 
     def test_openapi_documentation_is_available(self):
@@ -146,8 +123,17 @@ class ApiTests(unittest.TestCase):
         response = client.get("/openapi.json")
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["info"]["title"], "UI Service")
         self.assertIn("/rest/v1/cases", response.json()["paths"])
-        self.assertIn("/rest/v1/files", response.json()["paths"])
+        self.assertFalse(
+            any(
+                path.startswith("/rest/v1/files")
+                for path in response.json()["paths"]
+            )
+        )
+        self.assertNotIn(
+            "FileResponse", response.json().get("components", {}).get("schemas", {})
+        )
         self.assertIn(
             "/rest/v1/case/{case_id}/action/getUploadUrl",
             response.json()["paths"],

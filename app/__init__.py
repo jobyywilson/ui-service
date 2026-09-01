@@ -1,1 +1,1 @@
-"""Read-only PostgreSQL REST API package."""
+"""UI Service package."""
