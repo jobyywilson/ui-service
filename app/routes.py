@@ -60,7 +60,7 @@ def read_case(
 
 
 @action_router.get(
-    "/case/{case_id}/action/getUploadUrl",
+    "/cases/{case_id}/upload-url",
     response_model=UploadUrlResponse,
     summary="Get a case file upload URL",
     description=(

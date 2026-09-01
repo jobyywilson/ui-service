@@ -91,7 +91,7 @@ Interactive API documentation is available at `http://localhost:3000/docs`.
 ```http
 GET /rest/v1/cases
 GET /rest/v1/cases/{id}
-GET /rest/v1/case/{id}/action/getUploadUrl
+GET /rest/v1/cases/{id}/upload-url
 ```
 
 The case endpoints are read-only and query `case_details`. The upload action
@@ -100,7 +100,7 @@ creates a signed Supabase Storage URL but does not upload a file itself.
 Generate a short-lived Supabase Storage upload URL for an existing case:
 
 ```http
-GET /rest/v1/case/1001/action/getUploadUrl?fileName=evidence.pdf
+GET /rest/v1/cases/1001/upload-url?fileName=evidence.pdf
 ```
 
 ```json

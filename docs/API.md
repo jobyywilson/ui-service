@@ -14,7 +14,7 @@ interactive Swagger documentation at `/docs` and the OpenAPI document at
 | --- | --- | --- |
 | `GET` | `/rest/v1/cases` | List or search case records. |
 | `GET` | `/rest/v1/cases/{id}` | Return one case by its numeric ID. |
-| `GET` | `/rest/v1/case/{id}/action/getUploadUrl` | Create a signed case upload URL. |
+| `GET` | `/rest/v1/cases/{id}/upload-url` | Create a signed case upload URL. |
 
 The API does not currently expose create, update, or delete operations.
 
@@ -23,7 +23,7 @@ The API does not currently expose create, update, or delete operations.
 Request a short-lived upload URL for an existing case:
 
 ```http
-GET /rest/v1/case/1001/action/getUploadUrl?fileName=evidence.pdf
+GET /rest/v1/cases/1001/upload-url?fileName=evidence.pdf
 ```
 
 `fileName` is optional. The service removes path components and unsafe

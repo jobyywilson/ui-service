@@ -115,6 +115,10 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(client.get("/cases").status_code, 404)
         self.assertEqual(client.get("/rest/v1/files").status_code, 404)
         self.assertEqual(client.get("/rest/v1/files/501").status_code, 404)
+        self.assertEqual(
+            client.get("/rest/v1/case/1001/action/getUploadUrl").status_code,
+            404,
+        )
         self.assertEqual(client.post("/rest/v1/cases").status_code, 405)
 
     def test_openapi_documentation_is_available(self):
@@ -135,7 +139,7 @@ class ApiTests(unittest.TestCase):
             "FileResponse", response.json().get("components", {}).get("schemas", {})
         )
         self.assertIn(
-            "/rest/v1/case/{case_id}/action/getUploadUrl",
+            "/rest/v1/cases/{case_id}/upload-url",
             response.json()["paths"],
         )
         case_parameters = response.json()["paths"]["/rest/v1/cases"]["get"][
@@ -150,8 +154,7 @@ class ApiTests(unittest.TestCase):
         client = self._client(RecordingExecutor(CASE_ROWS), provider)
 
         response = client.get(
-            "/rest/v1/case/1001/action/getUploadUrl"
-            "?fileName=../evidence%20copy.pdf"
+            "/rest/v1/cases/1001/upload-url?fileName=../evidence%20copy.pdf"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -169,7 +172,7 @@ class ApiTests(unittest.TestCase):
         provider = RecordingUploadUrlProvider()
         client = self._client(RecordingExecutor([]), provider)
 
-        response = client.get("/rest/v1/case/999/action/getUploadUrl")
+        response = client.get("/rest/v1/cases/999/upload-url")
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"error": "Case not found."})
@@ -181,7 +184,7 @@ class ApiTests(unittest.TestCase):
 
         client = self._client(RecordingExecutor(CASE_ROWS), unavailable_provider)
         with self.assertLogs("app.main", level="ERROR"):
-            response = client.get("/rest/v1/case/1001/action/getUploadUrl")
+            response = client.get("/rest/v1/cases/1001/upload-url")
 
         self.assertEqual(response.status_code, 502)
         self.assertEqual(
