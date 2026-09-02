@@ -22,6 +22,33 @@ CASE_ROWS = [
     }
 ]
 
+ENTITY_ROWS = [
+    {
+        "id": 1001,
+        "entityName": "PERSON",
+        "label": "Person",
+        "entityDescription": "An individual.",
+        "isStandard": "Y",
+        "dateAdded": "2026-09-01T10:00:00",
+        "dateModified": "2026-09-01T10:00:00",
+        "addedBy": "system",
+        "modifiedBy": "system",
+    }
+]
+
+EXTRACTED_ROWS = [
+    {
+        "id": 5001,
+        "caseId": 7001,
+        "extractedDetails": {"identifiers": []},
+        "isStandard": "Y",
+        "dateAdded": "2026-09-01T10:00:00",
+        "dateModified": "2026-09-01T10:00:00",
+        "addedBy": "system",
+        "modifiedBy": "system",
+    }
+]
+
 class RecordingExecutor:
     def __init__(self, rows):
         self.rows = rows
@@ -80,6 +107,59 @@ class ApiTests(unittest.TestCase):
         self.assertIn("LIMIT 1", statement)
         self.assertEqual(parameters, (1001,))
 
+    def test_get_entities_reads_entity_details(self):
+        executor = RecordingExecutor(ENTITY_ROWS)
+        response = self._client(executor).get(
+            "/rest/v1/entities?isStandard=Y&entityName=PERSON"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), ENTITY_ROWS)
+        statement, parameters = executor.calls[0]
+        self.assertIn("FROM entity_details", statement)
+        self.assertIn('entity_name AS "entityName"', statement)
+        self.assertEqual(parameters, ("%PERSON%", "%Y%"))
+
+    def test_get_entity_attributes_filters_by_entity_id(self):
+        executor = RecordingExecutor([])
+        response = self._client(executor).get(
+            "/rest/v1/entity-attributes?entityId=1028"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        statement, parameters = executor.calls[0]
+        self.assertIn("FROM entity_attribute_details", statement)
+        self.assertIn("entity_id = %s", statement)
+        self.assertEqual(parameters, (1028,))
+
+    def test_get_relationships_and_attributes_are_exposed(self):
+        executor = RecordingExecutor([])
+        client = self._client(executor)
+
+        self.assertEqual(client.get("/rest/v1/relationships").status_code, 200)
+        self.assertEqual(
+            client.get(
+                "/rest/v1/relationship-attributes?relationshipId=3013"
+            ).status_code,
+            200,
+        )
+        self.assertIn("FROM relationship_details", executor.calls[0][0])
+        self.assertIn("FROM relationship_attribute_details", executor.calls[1][0])
+        self.assertEqual(executor.calls[1][1], (3013,))
+
+    def test_get_extracted_graph_payloads_filters_by_case(self):
+        executor = RecordingExecutor(EXTRACTED_ROWS)
+        response = self._client(executor).get(
+            "/rest/v1/extracted-entity-relationships?caseId=7001"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), EXTRACTED_ROWS)
+        statement, parameters = executor.calls[0]
+        self.assertIn("FROM extracted_entity_relationship", statement)
+        self.assertIn('extracted_details AS "extractedDetails"', statement)
+        self.assertEqual(parameters, (7001,))
+
     def test_returns_404_when_record_does_not_exist(self):
         response = self._client(RecordingExecutor([])).get("/rest/v1/cases/999")
 
@@ -129,6 +209,15 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["info"]["title"], "UI Service")
         self.assertIn("/rest/v1/cases", response.json()["paths"])
+        self.assertIn("/rest/v1/entities", response.json()["paths"])
+        self.assertIn("/rest/v1/entity-attributes", response.json()["paths"])
+        self.assertIn("/rest/v1/relationships", response.json()["paths"])
+        self.assertIn(
+            "/rest/v1/relationship-attributes", response.json()["paths"]
+        )
+        self.assertIn(
+            "/rest/v1/extracted-entity-relationships", response.json()["paths"]
+        )
         self.assertFalse(
             any(
                 path.startswith("/rest/v1/files")

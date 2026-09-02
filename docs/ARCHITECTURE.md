@@ -22,7 +22,7 @@ HTTP request
 | `app/main.py` | Builds FastAPI, configures CORS, and registers error handlers. |
 | `app/routes.py` | Declares the read and upload-URL endpoints and response contracts. |
 | `app/filters.py` | Defines typed, camelCase query parameters for OpenAPI. |
-| `app/models.py` | Defines the case and upload-URL response schemas. |
+| `app/models.py` | Defines case, entity-resolution, and upload response schemas. |
 | `app/services.py` | Coordinates query construction and database execution. |
 | `app/query_builder.py` | Validates filters and produces parameterized SELECTs. |
 | `app/resources.py` | Holds the fixed API-to-database identifier allowlists. |
@@ -43,8 +43,8 @@ HTTP request
 - The API currently has no caller authentication. Do not expose it publicly
   until an authentication and authorization policy has been added.
 - For production, connect with a dedicated PostgreSQL role that has only
-  `SELECT` access to `case_details`, rather than the Supabase `postgres`
-  administrator role.
+  `SELECT` access to the API's allowlisted tables, rather than the Supabase
+  `postgres` administrator role.
 
 ## Database connections
 

@@ -1,7 +1,7 @@
 """Pydantic response contracts exposed in the OpenAPI schema."""
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -44,3 +44,56 @@ class UploadUrlResponse(BaseModel):
         alias="uploadUrl",
         description="Signed Supabase Storage upload URL, valid for about two hours.",
     )
+
+
+class AuditFields(BaseModel):
+    """Audit columns shared by entity-resolution resources."""
+
+    date_added: datetime = Field(alias="dateAdded")
+    date_modified: datetime = Field(alias="dateModified")
+    added_by: Optional[str] = Field(None, alias="addedBy")
+    modified_by: Optional[str] = Field(None, alias="modifiedBy")
+
+
+class EntityResponse(AuditFields):
+    id: int
+    entity_name: Optional[str] = Field(None, alias="entityName")
+    label: Optional[str] = None
+    entity_description: Optional[str] = Field(None, alias="entityDescription")
+    is_standard: Optional[str] = Field(None, alias="isStandard")
+
+
+class EntityAttributeResponse(AuditFields):
+    id: int
+    attribute_type: Optional[str] = Field(None, alias="attributeType")
+    attribute_data_type: Optional[str] = Field(None, alias="attributeDataType")
+    attribute_description: Optional[str] = Field(
+        None, alias="attributeDescription"
+    )
+    entity_id: int = Field(alias="entityId")
+
+
+class RelationshipResponse(AuditFields):
+    id: int
+    relationship_name: Optional[str] = Field(None, alias="relationshipName")
+    relationship_description: Optional[str] = Field(
+        None, alias="relationshipDescription"
+    )
+    is_standard: Optional[str] = Field(None, alias="isStandard")
+
+
+class RelationshipAttributeResponse(AuditFields):
+    id: int
+    attribute_type: Optional[str] = Field(None, alias="attributeType")
+    relationship_id: int = Field(alias="relationshipId")
+    attribute_description: Optional[str] = Field(
+        None, alias="attributeDescription"
+    )
+    attribute_data_type: Optional[str] = Field(None, alias="attributeDataType")
+
+
+class ExtractedEntityRelationshipResponse(AuditFields):
+    id: int
+    case_id: int = Field(alias="caseId")
+    extracted_details: Any = Field(alias="extractedDetails")
+    is_standard: Optional[str] = Field(None, alias="isStandard")

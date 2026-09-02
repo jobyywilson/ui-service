@@ -92,10 +92,31 @@ Interactive API documentation is available at `http://localhost:3000/docs`.
 GET /rest/v1/cases
 GET /rest/v1/cases/{id}
 GET /rest/v1/cases/{id}/upload-url
+GET /rest/v1/entities
+GET /rest/v1/entities/{id}
+GET /rest/v1/entity-attributes
+GET /rest/v1/entity-attributes/{id}
+GET /rest/v1/relationships
+GET /rest/v1/relationships/{id}
+GET /rest/v1/relationship-attributes
+GET /rest/v1/relationship-attributes/{id}
+GET /rest/v1/extracted-entity-relationships
+GET /rest/v1/extracted-entity-relationships/{id}
 ```
 
 The case endpoints are read-only and query `case_details`. The upload action
 creates a signed Supabase Storage URL but does not upload a file itself.
+
+The entity-resolution endpoints are also read-only. Collection endpoints support
+`search`, field-specific search, and direct camelCase filters. For example:
+
+```http
+GET /rest/v1/entities?isStandard=Y&search=identifier
+GET /rest/v1/entity-attributes?entityId=1028
+GET /rest/v1/relationships?relationshipName=RESOLVED_TO
+GET /rest/v1/relationship-attributes?relationshipId=3013
+GET /rest/v1/extracted-entity-relationships?caseId=7001
+```
 
 Generate a short-lived Supabase Storage upload URL for an existing case:
 

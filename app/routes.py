@@ -4,9 +4,31 @@ from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Response
 
-from app.filters import CaseFilters
-from app.models import CaseResponse, UploadUrlResponse
-from app.resources import CASES
+from app.filters import (
+    CaseFilters,
+    EntityAttributeFilters,
+    EntityFilters,
+    ExtractedEntityRelationshipFilters,
+    RelationshipAttributeFilters,
+    RelationshipFilters,
+)
+from app.models import (
+    CaseResponse,
+    EntityAttributeResponse,
+    EntityResponse,
+    ExtractedEntityRelationshipResponse,
+    RelationshipAttributeResponse,
+    RelationshipResponse,
+    UploadUrlResponse,
+)
+from app.resources import (
+    CASES,
+    ENTITIES,
+    ENTITY_ATTRIBUTES,
+    EXTRACTED_ENTITY_RELATIONSHIPS,
+    RELATIONSHIPS,
+    RELATIONSHIP_ATTRIBUTES,
+)
 from app.services import (
     QueryExecutor,
     UploadUrlProvider,
@@ -57,6 +79,146 @@ def read_case(
     """Return one case record by primary key."""
 
     return get_record(CASES, record_id, query_executor)
+
+
+@router.get("/entities", response_model=List[EntityResponse], tags=["Entities"])
+def read_entities(
+    filters: Annotated[EntityFilters, Query()],
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """List and search standard and custom entity definitions."""
+
+    return list_records(ENTITIES, filters.as_query_parameters(), query_executor)
+
+
+@router.get("/entities/{record_id}", response_model=EntityResponse, tags=["Entities"])
+def read_entity(
+    record_id: int,
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """Return one entity definition by ID."""
+
+    return get_record(ENTITIES, record_id, query_executor)
+
+
+@router.get(
+    "/entity-attributes",
+    response_model=List[EntityAttributeResponse],
+    tags=["Entities"],
+)
+def read_entity_attributes(
+    filters: Annotated[EntityAttributeFilters, Query()],
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """List and search entity attribute definitions."""
+
+    return list_records(
+        ENTITY_ATTRIBUTES, filters.as_query_parameters(), query_executor
+    )
+
+
+@router.get(
+    "/entity-attributes/{record_id}",
+    response_model=EntityAttributeResponse,
+    tags=["Entities"],
+)
+def read_entity_attribute(
+    record_id: int,
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """Return one entity attribute definition by ID."""
+
+    return get_record(ENTITY_ATTRIBUTES, record_id, query_executor)
+
+
+@router.get(
+    "/relationships",
+    response_model=List[RelationshipResponse],
+    tags=["Relationships"],
+)
+def read_relationships(
+    filters: Annotated[RelationshipFilters, Query()],
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """List and search relationship definitions."""
+
+    return list_records(RELATIONSHIPS, filters.as_query_parameters(), query_executor)
+
+
+@router.get(
+    "/relationships/{record_id}",
+    response_model=RelationshipResponse,
+    tags=["Relationships"],
+)
+def read_relationship(
+    record_id: int,
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """Return one relationship definition by ID."""
+
+    return get_record(RELATIONSHIPS, record_id, query_executor)
+
+
+@router.get(
+    "/relationship-attributes",
+    response_model=List[RelationshipAttributeResponse],
+    tags=["Relationships"],
+)
+def read_relationship_attributes(
+    filters: Annotated[RelationshipAttributeFilters, Query()],
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """List and search relationship attribute definitions."""
+
+    return list_records(
+        RELATIONSHIP_ATTRIBUTES, filters.as_query_parameters(), query_executor
+    )
+
+
+@router.get(
+    "/relationship-attributes/{record_id}",
+    response_model=RelationshipAttributeResponse,
+    tags=["Relationships"],
+)
+def read_relationship_attribute(
+    record_id: int,
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """Return one relationship attribute definition by ID."""
+
+    return get_record(RELATIONSHIP_ATTRIBUTES, record_id, query_executor)
+
+
+@router.get(
+    "/extracted-entity-relationships",
+    response_model=List[ExtractedEntityRelationshipResponse],
+    tags=["Entity Resolution"],
+)
+def read_extracted_entity_relationships(
+    filters: Annotated[ExtractedEntityRelationshipFilters, Query()],
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """List and search extracted graph payloads."""
+
+    return list_records(
+        EXTRACTED_ENTITY_RELATIONSHIPS,
+        filters.as_query_parameters(),
+        query_executor,
+    )
+
+
+@router.get(
+    "/extracted-entity-relationships/{record_id}",
+    response_model=ExtractedEntityRelationshipResponse,
+    tags=["Entity Resolution"],
+)
+def read_extracted_entity_relationship(
+    record_id: int,
+    query_executor: QueryExecutor = Depends(get_query_executor),
+):
+    """Return one extracted graph payload by ID."""
+
+    return get_record(EXTRACTED_ENTITY_RELATIONSHIPS, record_id, query_executor)
 
 
 @action_router.get(

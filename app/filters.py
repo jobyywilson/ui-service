@@ -72,3 +72,56 @@ class CaseFilters(QueryFilters):
         alias="modifiedBy",
         description="Partial, case-insensitive username match.",
     )
+
+
+class AuditFilters(QueryFilters):
+    """Common audit filters for entity-resolution resources."""
+
+    date_added: Optional[str] = Field(None, alias="dateAdded")
+    date_modified: Optional[str] = Field(None, alias="dateModified")
+    added_by: Optional[str] = Field(None, alias="addedBy")
+    modified_by: Optional[str] = Field(None, alias="modifiedBy")
+
+
+class EntityFilters(AuditFilters):
+    id: Optional[int] = None
+    entity_name: Optional[str] = Field(None, alias="entityName")
+    label: Optional[str] = None
+    entity_description: Optional[str] = Field(None, alias="entityDescription")
+    is_standard: Optional[str] = Field(None, alias="isStandard")
+
+
+class EntityAttributeFilters(AuditFilters):
+    id: Optional[int] = None
+    attribute_type: Optional[str] = Field(None, alias="attributeType")
+    attribute_data_type: Optional[str] = Field(None, alias="attributeDataType")
+    attribute_description: Optional[str] = Field(
+        None, alias="attributeDescription"
+    )
+    entity_id: Optional[int] = Field(None, alias="entityId")
+
+
+class RelationshipFilters(AuditFilters):
+    id: Optional[int] = None
+    relationship_name: Optional[str] = Field(None, alias="relationshipName")
+    relationship_description: Optional[str] = Field(
+        None, alias="relationshipDescription"
+    )
+    is_standard: Optional[str] = Field(None, alias="isStandard")
+
+
+class RelationshipAttributeFilters(AuditFilters):
+    id: Optional[int] = None
+    attribute_type: Optional[str] = Field(None, alias="attributeType")
+    relationship_id: Optional[int] = Field(None, alias="relationshipId")
+    attribute_description: Optional[str] = Field(
+        None, alias="attributeDescription"
+    )
+    attribute_data_type: Optional[str] = Field(None, alias="attributeDataType")
+
+
+class ExtractedEntityRelationshipFilters(AuditFilters):
+    id: Optional[int] = None
+    case_id: Optional[int] = Field(None, alias="caseId")
+    extracted_details: Optional[str] = Field(None, alias="extractedDetails")
+    is_standard: Optional[str] = Field(None, alias="isStandard")

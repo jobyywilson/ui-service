@@ -24,10 +24,11 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="UI Service",
         description=(
-            "Backend APIs for the UI to read case metadata and obtain signed "
-            "case-file upload URLs. Database columns are returned as camelCase "
-            "JSON properties. Collection endpoints support keyword, "
-            "field-specific, and direct filtering."
+            "Backend APIs for the UI to read case metadata, entity-resolution "
+            "catalogs and extracted graph payloads, and obtain signed case-file "
+            "upload URLs. Database columns are returned as camelCase JSON "
+            "properties. Collection endpoints support keyword, field-specific, "
+            "and direct filtering."
         ),
         version="1.0.0",
         openapi_tags=[
@@ -38,6 +39,18 @@ def create_app() -> FastAPI:
             {
                 "name": "Uploads",
                 "description": "Create short-lived case file upload URLs.",
+            },
+            {
+                "name": "Entities",
+                "description": "Read entity and entity-attribute definitions.",
+            },
+            {
+                "name": "Relationships",
+                "description": "Read relationship and attribute definitions.",
+            },
+            {
+                "name": "Entity Resolution",
+                "description": "Read extracted Track 7 graph payloads.",
             },
         ],
     )

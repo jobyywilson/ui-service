@@ -1,7 +1,7 @@
 import unittest
 
 from app.query_builder import QueryValidationError, build_select_query
-from app.resources import CASES
+from app.resources import CASES, ENTITY_ATTRIBUTES, EXTRACTED_ENTITY_RELATIONSHIPS
 
 
 class QueryBuilderTests(unittest.TestCase):
@@ -36,3 +36,18 @@ class QueryBuilderTests(unittest.TestCase):
         query = build_select_query(CASES, {"search": ["100%_complete"]})
 
         self.assertEqual(query.parameters[0], "%100\\%\\_complete%")
+
+    def test_entity_foreign_key_filter_uses_integer_equality(self):
+        query = build_select_query(ENTITY_ATTRIBUTES, {"entityId": ["1028"]})
+
+        self.assertIn("entity_id = %s", query.statement)
+        self.assertEqual(query.parameters, (1028,))
+
+    def test_extracted_resource_selects_jsonb_with_camel_case_alias(self):
+        query = build_select_query(
+            EXTRACTED_ENTITY_RELATIONSHIPS, {"caseId": ["7001"]}
+        )
+
+        self.assertIn('extracted_details AS "extractedDetails"', query.statement)
+        self.assertIn("case_id = %s", query.statement)
+        self.assertEqual(query.parameters, (7001,))

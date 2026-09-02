@@ -1,8 +1,9 @@
 # API reference
 
-The UI Service exposes read-only access to the PostgreSQL `case_details` table
-and generates signed case-file upload URLs. Database column names are converted
-from snake_case to camelCase in both JSON responses and query parameters.
+The UI Service exposes read-only access to PostgreSQL case and Track 7
+entity-resolution tables and generates signed case-file upload URLs. Database
+column names are converted from snake_case to camelCase in both JSON responses
+and query parameters.
 
 The default local base URL is `http://localhost:3000`. FastAPI also publishes
 interactive Swagger documentation at `/docs` and the OpenAPI document at
@@ -15,6 +16,16 @@ interactive Swagger documentation at `/docs` and the OpenAPI document at
 | `GET` | `/rest/v1/cases` | List or search case records. |
 | `GET` | `/rest/v1/cases/{id}` | Return one case by its numeric ID. |
 | `GET` | `/rest/v1/cases/{id}/upload-url` | Create a signed case upload URL. |
+| `GET` | `/rest/v1/entities` | List or search entity definitions. |
+| `GET` | `/rest/v1/entities/{id}` | Return one entity definition. |
+| `GET` | `/rest/v1/entity-attributes` | List or search entity attributes. |
+| `GET` | `/rest/v1/entity-attributes/{id}` | Return one entity attribute. |
+| `GET` | `/rest/v1/relationships` | List or search relationship definitions. |
+| `GET` | `/rest/v1/relationships/{id}` | Return one relationship definition. |
+| `GET` | `/rest/v1/relationship-attributes` | List relationship attributes. |
+| `GET` | `/rest/v1/relationship-attributes/{id}` | Return one relationship attribute. |
+| `GET` | `/rest/v1/extracted-entity-relationships` | List extracted JSONB graph payloads. |
+| `GET` | `/rest/v1/extracted-entity-relationships/{id}` | Return one extracted graph payload. |
 
 The API does not currently expose create, update, or delete operations.
 
@@ -79,6 +90,16 @@ GET /rest/v1/cases?caseCategory=fraud&addedBy=admin
 matching. Percent signs and underscores in keywords are treated as literal
 characters rather than SQL wildcard operators.
 
+Foreign-key-style filters such as `entityId`, `relationshipId`, and `caseId`
+also use exact integer equality:
+
+```http
+GET /rest/v1/entities?isStandard=Y
+GET /rest/v1/entity-attributes?entityId=1028
+GET /rest/v1/relationship-attributes?relationshipId=3013
+GET /rest/v1/extracted-entity-relationships?caseId=7001
+```
+
 ### Case fields
 
 | API field | Database column | Matching |
@@ -142,4 +163,8 @@ Example application error:
 ```bash
 curl "http://localhost:3000/rest/v1/cases?search=fraud"
 curl "http://localhost:3000/rest/v1/cases/1001"
+curl "http://localhost:3000/rest/v1/entities?isStandard=Y"
+curl "http://localhost:3000/rest/v1/entity-attributes?entityId=1028"
+curl "http://localhost:3000/rest/v1/relationships?search=resolved"
+curl "http://localhost:3000/rest/v1/extracted-entity-relationships?caseId=7001"
 ```
