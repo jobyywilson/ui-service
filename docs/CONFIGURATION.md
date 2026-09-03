@@ -79,20 +79,21 @@ through `SUPABASE_SERVICE_ROLE_KEY` while migrating to current secret keys.
 With `DATABASE_URL` exported in the shell:
 
 ```bash
-psql "$DATABASE_URL" -f schema.sql
+psql "$DATABASE_URL" -f sql/ddl/01_case_and_file.sql
 ```
 
-Alternatively, paste `schema.sql` into the Supabase SQL Editor.
+Alternatively, paste the files under `sql/ddl/` into the Supabase SQL Editor
+in numeric order.
 
 ## Load sample data
 
 After creating the schema, load the optional sample cases and files:
 
 ```bash
-psql "$DATABASE_URL" -f sample_data.sql
+psql "$DATABASE_URL" -f sql/seed-data/01_case_and_file_seed.sql
 ```
 
-`sample_data.sql` inserts four cases and five files. It uses fixed IDs, skips
+`sql/seed-data/01_case_and_file_seed.sql` inserts four cases and five files. It uses fixed IDs, skips
 rows that already exist, and updates both identity sequences afterward. The same
 script can be pasted into the Supabase SQL Editor.
 
@@ -102,6 +103,6 @@ script can be pasted into the Supabase SQL Editor.
   `requirements.txt` or `requirements-dev.txt`.
 - `Database is unavailable`: verify the host, password, SSL mode, and network
   support for IPv4 or IPv6.
-- `relation ... does not exist`: run `schema.sql` in the same database used by
+- `relation ... does not exist`: run the files under `sql/ddl/` in numeric order in the same database used by
   the API.
 - Port validation failure: set `PORT` to an integer from `1` through `65535`.

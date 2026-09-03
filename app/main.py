@@ -5,9 +5,13 @@ import logging
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from neo4j.exceptions import Neo4jError, ServiceUnavailable
 
 from app.config import ConfigurationError, load_env_file
 from app.database import DatabaseAccessError
+from app.graph_analytics.database import close_graph_driver
+from app.graph_analytics.routes import router as graph_router
+from app.ontology.routes import router as ontology_router
 from app.query_builder import QueryValidationError
 from app.routes import action_router, router
 from app.services import RecordNotFoundError
@@ -52,6 +56,10 @@ def create_app() -> FastAPI:
                 "name": "Entity Resolution",
                 "description": "Read extracted Track 7 graph payloads.",
             },
+            {
+                "name": "Graph Analytics",
+                "description": "Explore the case knowledge graph in Neo4j.",
+            },
         ],
     )
     application.add_middleware(
@@ -63,6 +71,12 @@ def create_app() -> FastAPI:
     )
     application.include_router(router)
     application.include_router(action_router)
+    application.include_router(ontology_router)
+    application.include_router(graph_router)
+
+    @application.on_event("shutdown")
+    def close_neo4j_driver() -> None:
+        close_graph_driver(application)
 
     @application.exception_handler(QueryValidationError)
     async def query_validation_error_handler(
@@ -102,6 +116,22 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"error": "Database is unavailable."},
+        )
+
+    @application.exception_handler(ServiceUnavailable)
+    @application.exception_handler(Neo4jError)
+    async def graph_database_error_handler(
+        _request: Request, error: Neo4jError
+    ) -> JSONResponse:
+        LOGGER.error("Neo4j request failed: %s", error)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            media_type="application/problem+json",
+            content={
+                "title": "Graph database unavailable",
+                "status": 503,
+                "code": "GRAPH_DATABASE_UNAVAILABLE",
+            },
         )
 
     @application.exception_handler(StorageAccessError)

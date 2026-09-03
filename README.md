@@ -22,9 +22,13 @@ app/database.py        PostgreSQL connection and serialization
 app/services.py        Framework-independent resource services
 app/models.py          Pydantic response contracts
 app/filters.py         Validated camelCase query parameters
-app/routes.py          FastAPI endpoint definitions
+app/routes.py          PostgreSQL-backed FastAPI endpoint definitions
+app/ontology/          Entity and relationship ontology API routes
+app/graph_analytics/   Neo4j routes, connection settings, and Cypher queries
 app/main.py            FastAPI application and error handling
 tests/                 Unit tests grouped by layer
+sql/ddl/               Flat, ordered PostgreSQL DDL scripts
+sql/seed-data/         Flat, ordered PostgreSQL development seed scripts
 ```
 
 ## Set up
@@ -46,12 +50,34 @@ The configured `db.<project-ref>.supabase.co` host is Supabase's direct
 connection, which normally requires IPv6. On an IPv4-only network, set
 `DATABASE_URL` to the Session pooler URI copied from the Supabase Connect dialog.
 
+Graph endpoints use Neo4j Cloud. Add the following values to the same `.env`:
+
+```dotenv
+NEO4J_URI=neo4j+s://YOUR_INSTANCE_ID.databases.neo4j.io
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=YOUR_NEO4J_PASSWORD
+NEO4J_DATABASE=neo4j
+NEO4J_VERIFY_CONNECTIVITY=true
+```
+
+To load development data into Neo4j Aura, open Aura Query, select the `neo4j`
+database, then paste and run `sample_data.cypher`. This
+development-only script deletes every existing node and relationship before it
+creates case `1001` with eight entities, ten graph relationships, evidence records,
+relationship evidence, merge history, communities, and bridge metrics.
+
+Graph list endpoints support comma-separated `entityType` and
+`relationshipType` filters plus `deviceId`, `sourceFileId`, `communityId`,
+`warningStatus`, `from`, `to`, `search`, `minConfidence`, and an opaque
+pagination `cursor`. Only canonical entities with stable `id` values and
+relationships backed by evidence are returned.
+
 ## Create the tables
 
 Run the included PostgreSQL schema before starting the API:
 
 ```bash
-psql "$DATABASE_URL" -f schema.sql
+psql "$DATABASE_URL" -f sql/ddl/01_case_and_file.sql
 ```
 
 If you use separate `DB_*` variables rather than `DATABASE_URL`, run the schema
@@ -60,10 +86,10 @@ through Supabase's SQL Editor or construct the equivalent `psql` command.
 Load the optional sample records after creating the tables:
 
 ```bash
-psql "$DATABASE_URL" -f sample_data.sql
+psql "$DATABASE_URL" -f sql/seed-data/01_case_and_file_seed.sql
 ```
 
-You can also paste [sample_data.sql](sample_data.sql) into the Supabase SQL
+You can also paste [01_case_and_file_seed.sql](sql/seed-data/01_case_and_file_seed.sql) into the Supabase SQL
 Editor. It inserts four cases and five associated files and is safe to rerun.
 
 ## Run
@@ -102,6 +128,16 @@ GET /rest/v1/relationship-attributes
 GET /rest/v1/relationship-attributes/{id}
 GET /rest/v1/extracted-entity-relationships
 GET /rest/v1/extracted-entity-relationships/{id}
+GET /rest/v1/cases/{caseId}/graph
+GET /rest/v1/cases/{caseId}/graph/neighborhood
+GET /rest/v1/cases/{caseId}/graph/entities/{entityId}
+GET /rest/v1/cases/{caseId}/graph/entities/{entityId}/source-records
+GET /rest/v1/cases/{caseId}/graph/entities/{entityId}/merge-history
+GET /rest/v1/cases/{caseId}/graph/relationships/{relationshipId}
+GET /rest/v1/cases/{caseId}/graph/relationships/{relationshipId}/evidence
+GET /rest/v1/cases/{caseId}/graph/timeline
+GET /rest/v1/cases/{caseId}/graph/communities
+GET /rest/v1/cases/{caseId}/graph/bridges
 ```
 
 The case endpoints are read-only and query `case_details`. The upload action
