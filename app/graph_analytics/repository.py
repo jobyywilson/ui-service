@@ -39,8 +39,11 @@ class GraphRepository:
         self.driver, self.database = driver, database
 
     def run(self, query, **parameters):
-        with self.driver.session(database=self.database) as session:
-            return [json_value(row.data()) for row in session.run(query, **parameters)]
+        options = {"parameters_": parameters}
+        if self.database:
+            options["database_"] = self.database
+        result = self.driver.execute_query(query, **options)
+        return [json_value(row.data()) for row in result.records]
 
     def nodes(self, case_id, limit, offset=0, filters=None):
         filters = filters or {}

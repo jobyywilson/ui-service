@@ -56,9 +56,11 @@ Graph endpoints use Neo4j Cloud. Add the following values to the same `.env`:
 NEO4J_URI=neo4j+s://YOUR_INSTANCE_ID.databases.neo4j.io
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=YOUR_NEO4J_PASSWORD
-NEO4J_DATABASE=neo4j
 NEO4J_VERIFY_CONNECTIVITY=true
 ```
+
+`NEO4J_DATABASE` is optional. Leave it unset to use the Aura account's home
+database.
 
 To load development data into Neo4j Aura, open Aura Query, select the `neo4j`
 database, then paste and run `sample_data.cypher`. This

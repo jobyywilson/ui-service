@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from typing import Optional
 
 from app.config import ConfigurationError
 
@@ -9,7 +10,7 @@ class Neo4jSettings:
     uri: str
     username: str
     password: str
-    database: str
+    database: Optional[str]
     verify_connectivity: bool
 
 
@@ -27,6 +28,6 @@ def get_neo4j_settings(environment=None):
     verify = source.get("NEO4J_VERIFY_CONNECTIVITY", "true").lower()
     return Neo4jSettings(
         uri, source["NEO4J_USERNAME"], source["NEO4J_PASSWORD"],
-        source.get("NEO4J_DATABASE", "neo4j"),
+        source.get("NEO4J_DATABASE") or None,
         verify in {"1", "true", "yes", "on"},
     )
