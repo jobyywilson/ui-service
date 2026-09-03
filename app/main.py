@@ -35,6 +35,9 @@ def create_app() -> FastAPI:
             "and direct filtering."
         ),
         version="1.0.0",
+        docs_url="/rest/v1/docs",
+        redoc_url="/rest/v1/redoc",
+        openapi_url="/rest/v1/openapi.json",
         openapi_tags=[
             {
                 "name": "Cases",
